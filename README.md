@@ -1,6 +1,6 @@
 # Predator Prey Simulation
 
-**Your Name** Ebrahim Bonger
+ - Ebrahim Bonger
  - ebrahim5@gwu.edu
  - EbrahimBonger
 
