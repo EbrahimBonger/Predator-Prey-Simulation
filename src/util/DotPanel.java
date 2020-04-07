@@ -94,7 +94,7 @@ public class DotPanel extends javax.swing.JPanel {
 		width = this.getWidth();
 		height = this.getHeight();
 
-		if(width ==0 || height == 0) {
+		if(width == 0 || height == 0) {
 			System.out.println("ERROR: You tried calling init() to soon!  Make sure you add the panel to a frame and call pack() first!");
 			System.exit(-1);
 		}

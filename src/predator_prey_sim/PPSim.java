@@ -33,7 +33,6 @@ public class PPSim extends JFrame {
 	private static final int NUM_PREDATORS = 5;
 
 
-
 	/*
 	 * This fills the frame with a "DotPanel", a type of drawing canvas that
 	 * allows you to easily draw squares for predators and circles for prey
@@ -88,6 +87,8 @@ public class PPSim extends JFrame {
 	public static void main(String[] args) {
 		/* Create a new GUI window  */
 		new PPSim();
+
+
 	}
 
 }
