@@ -1,174 +1,206 @@
 package predator_prey_sim;
 
-import java.awt.*;
+import util.Helper;
 
-import static predator_prey_sim.PPSim.dp;
+import java.awt.*;
+import java.awt.event.HierarchyListener;
+
+import static predator_prey_sim.PPSim.*;
 import static util.Helper.newRandColor;
 
 public class Pray extends Animal {
 
+    String name = "R";
+    boolean camouflage = false;
+    int reproduceInterval = 100;
+    //boolean alive = true;
+    //Color c = newRandColor();
 
     public Pray(){}
-    public Pray(int x, int y){
 
-        this.c = newRandColor();
+    public Pray( int x, int y, Color c){
+        super(x, y, c);
         this.x = x;
         this.y = y;
-        //PPSim.dp.drawCircle(x, y, c);
+        this.alive = true;
+        //this.c = c;
+        //this.camouflage = camouflage;
+
     }
     //modify move method
     public void run(){}
 
     //abstract methods
     void move() {
-        Predator animal = new Predator();
-        //Left border case
-        if(visionDown(animal) == true || visionUp(animal) == true && x < 5){
-            moveRight();
-            moveRight();
+        int probablity = Helper.nextInt(100);
+        int randDirection  = Helper.nextInt(4);
+        //World w = new World();
+        // changing direction randomly
+        if(probablity < 10){
+            direction = randDirection;
         }
-        //Right border case
-        else if(visionDown(animal) == true || visionUp(animal) == true && x >= 95){
-            moveLeft();
-            moveLeft();
-        }
-        // upper border case
-        else if(visionLeft(animal) == true || visionRight(animal) == true && y < 5){
-            moveDown();
-            moveDown();
-        }
-        // lower border case
-        else if(visionLeft(animal) == true || visionRight(animal) == true && y > 95){
-            moveUp();
-            moveUp();
-        }
-        // middle cases
-        if(visionDown(animal) == true || visionUp(animal) == true){
-            moveRight();
-            moveRight();
-        }
-        //Right border case
-        else if(visionDown(animal) == true || visionUp(animal) == true){
-            moveLeft();
-            moveLeft();
-        }
-        // upper border case
-        else if(visionLeft(animal) == true || visionRight(animal) == true){
-            moveDown();
-            moveDown();
-        }
-        // lower border case
-        else if(visionLeft(animal) == true || visionRight(animal) == true){
-            moveUp();
-            moveUp();
-        }
+        reproduceInterval--;
+        //if (w.checkCoordination(x, y) == true){
+            if (direction == 0){ moveUp();}
+            if (direction == 1){moveDown();}
+            if (direction == 2){moveLeft();}
+            if (direction == 3){moveRight();}
+        //}
+
+
     }
 
     private void moveDown() {
-        if(y < 98 && y > 0){
-            y = y + 2;
-            System.out.println(y + " Moving down...");
-            //Predator movingDown = new Predator(x+0, y+2);
+        if (alive == true) {
+            if (y < MAX_Y - 2) {
+                y = y + 1;
+                //System.out.println(y + " Moving down...");
+                //Predator movingDown = new Predator(x+0, y+2);
+            }
         }
-
     }
     private void moveUp() {
-        if(y < 100 && y > 0){
-            y = y - 2;
-            System.out.println(y + " Moving up...");
+        if (alive == true){
+            if (y > 0) {
+            y = y - 1;
+            //System.out.println(y + " Moving up...");
             //Predator movingUp = new Predator(x+0, y-2);
         }
-
+        }
     }
     private void moveLeft() {
-        if (x < 100 && x > 0){
-            x = x - 2;
-            System.out.println(x + " Moving left...");
+        if (alive == true){
+            if (x > 0) {
+            x = x - 1;
+            //System.out.println(x + " Moving left...");
             //Predator movingLeft = new Predator(x+2, y+0);
         }
-
+        }
     }
     private void moveRight() {
-        if (x > 0 && x < 98){
-            x = x + 2;
-            System.out.println(x + " Moving right...");
-            //Predator movingRight = new Predator(x-2, y+0);
-        }
+        if (alive == true) {
+            if (x < MAX_X - 2) {
+                x = x + 1;
+
+                //dp.repaintAndSleep(3000);
+                //System.out.println(x + " Moving right...");
+                //Predator movingRight = new Predator(x-2, y+0);
+            }
+        }//System.out.println(x + " Moving right...false");
     }
 
 
-    void reproduce() {
+    public boolean reproduce() {
 
-    }
-
-    @Override
-    boolean visionUp(Animal animal) {
-        //dp.repaintAndSleep(3000);
-        animal = (Predator)animal;
-        int minDistance = animal.y + 10;
-        if(minDistance >= y && animal.x == x){
-            //System.out.println(y + " " + minDistance);
-            moveDown();
-            moveDown();
-            //dp.repaintAndSleep(3000);
+        int probablity = Helper.nextInt(100);
+        if(probablity < 2 && reproduceInterval < 0 && offSpring == true){
+            reproduceInterval = 1000;
+            offSpring = false;
             return true;
         }
         return false;
     }
 
     @Override
-    boolean visionDown(Animal animal) {
-        animal = (Predator)animal;
-        int minDistance = animal.y - 10;
-        if(minDistance <= y && animal.x == x){
-            moveUp();
-            moveUp();
-            return true;
+    int visionUp(int enemyY) {
+        int currentPosition = y;
+        while (y > 0){
+            currentPosition--;
+            if(enemyY == currentPosition){
+                return -1;
+            }
         }
-        return false;
+        return -1;
     }
 
     @Override
-    boolean visionLeft(Animal animal) {
-        animal = (Predator)animal;
-        int minDistance = animal.x + 10;
-        if(minDistance >= x && animal.y == y){
-            moveRight();
-            moveRight();
-            return true;
+    int visionDown(int enemyY) {
+        int currentPosition = y;
+        while (y < MAX_Y-2){
+            currentPosition++;
+            if(enemyY == currentPosition){
+                return -1;
+            }
         }
-        return false;
+        return -1;
     }
 
     @Override
-    boolean visionRight(Animal animal) {
-        animal = (Predator)animal;
-        int minDistance = animal.x - 10;
-        if(minDistance <= x && animal.y == y){
-            moveLeft();
-            moveLeft();
-            return true;
+    int visionLeft(int enemyX) {
+        int currentPosition = x;
+        while (x > 0){
+            currentPosition--;
+            if(enemyX == currentPosition){
+                return -1;
+            }
         }
-        return false;
+        return -1;
+    }
+
+    @Override
+    int visionRight(int enemyX) {
+        int currentPosition = x;
+        while (x  < MAX_X-2) {
+            currentPosition--;
+            if (enemyX == currentPosition) {
+                currentPosition--;
+                return -1;
+            }
+        }
+        return -1;
     }
 
     void die() {}
 
-    public void draw() { PPSim.dp.drawCircle(this.x, this.y, newRandColor()); }
+    //public void draw() { PPSim.dp.drawCircle(this.x, this.y, ; }
+    void draw() {
+
+        if(alive != false){
+            PPSim.dp.drawCircle(this.x, this.y, this.c);
+            //System.out.println(alive);
+            //return;
+        }
+        //PPSim.dp.drawCircle(this.x,this.y, this.c);
+        //System.out.println(alive);
+
+    }
+
+    @Override
+    String getName() {
+        return this.name;
+    }
+
+    //
+    // @Override
+    //public String getName() {return this.name;}
 
 
     public Pray eat() {
         return null;
     }
 
-    public int getPrayXpos(){
-        return x;
-    }
-    public int getPrayYpos(){
-        return y;
-    }
-    public Color getPrayColor() {return c;}
 
-    public void setPrayXpos(int x){ this.x = x; }
-    public void setPrayYpos(int y){ this.y = y; }
+    public Color getPrayColor() {return c;}
+    public boolean getCamouflage() {return camouflage;}
+    public void setCamouflage(boolean camouflage) { this.camouflage = camouflage;}
+    public boolean getAlive(){return this.alive;}
+
+    //check if the pray matches the world color
+    public boolean visibility(Color canvasColor){
+        if(canvasColor == c){
+            //System.out.println("canvasColor matched.......");
+             camouflage = true;
+        }
+        //System.out.println("canvasColor NOT...matched.......");
+        return camouflage;
+    }
+    // check pray alive of not
+    // any pray that has false return considered daed
+  public void setAlive(boolean alive){this.alive = alive;}
+  public boolean isAlive(){return this.alive;}
+    public void setColor(Color color){ this.c = color; }
+    public void setX(int x){ this.x = x; }
+    public void setY(int y){ this.y = y; }
+    public int getXpos(){ return x; }
+    public int getYpos(){return y; }
 }

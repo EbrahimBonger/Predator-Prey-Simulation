@@ -30,7 +30,7 @@ public class PPSim extends JFrame {
 	public static final int MAX_Y = 100;
 	public static final int DOT_SIZE = 6;
 	private static final int NUM_PREY = 10;
-	private static final int NUM_PREDATORS = 5;
+	private static final int NUM_PREDATORS = 35;
 
 
 	/*
@@ -76,9 +76,13 @@ public class PPSim extends JFrame {
 		while(true)
 		{
 			// Run update rules for world and everything in it
+			//ppworld.checkCoordination();
+
 			ppworld.update();
 			// Draw to screen and then refresh
+
 			ppworld.draw();
+
 			dp.repaintAndSleep(30);
 
 		}
@@ -90,6 +94,7 @@ public class PPSim extends JFrame {
 
 
 	}
+
 
 }
 
