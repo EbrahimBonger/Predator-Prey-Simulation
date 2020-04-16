@@ -4,29 +4,29 @@ import util.Helper;
 
 import java.awt.*;
 import java.util.ArrayList;
+import java.util.concurrent.ThreadLocalRandom;
+
+import static predator_prey_sim.PPSim.*;
 
 
 public class World {
 
-	protected static int width, height;
-	private Color canavasColor;
-	//static int programCounter = 0;
 
-	ArrayList<Animal> animals = new ArrayList<>();
+
+
+	protected static int width, height;
+	private Color canvasColor;
 	ArrayList<Predator> predators = new ArrayList<Predator>();
 	ArrayList<Pray> prays = new ArrayList<Pray>();
-
-	ArrayList<Animal> prayAnimal = animals;
-	//ArrayList<String> arrayListClone =  (ArrayList<String>) arrayListObject.clone();
-
-	ArrayList<Predator> clonePrd;
-
-	ArrayList<Pray> clonePray;
-
 	ArrayList<Predator> die = new ArrayList<Predator>();
-	ArrayList<Pray> eaten = new ArrayList<Pray>();
-	boolean isPrayAlive, isprdAlive, prayCamof;
-	int prayX, prayY, prdX, prdY, prdEnergy;
+	ArrayList<Pray> eaten = new ArrayList<>();
+	ArrayList<Pray> user = new ArrayList<>();
+	private int initialPrays;
+	private int initialPredators;
+	private int initialUserX;
+	private int initialUserY;
+	Pray userP;
+
 
 	/**
 	 * Create a new City and fill it with buildings and people.
@@ -36,18 +36,24 @@ public class World {
 	 //* @param numPrey     number of prey
 	 //* @param numPredator number of predators
 	 */
-	public World(){}
 	public World(int w, int h, int numPrey, int numPredator) {
 		width = w;
 		height = h;
-		//canavasColor = Color.white;
-		canavasColor = Helper.newRandColor();
-		//System.out.println("programCounter..." + programCounter++);
-
+		initialPrays = numPrey;
+		initialPredators = numPredator;
+		canvasColor = Helper.newRandColor();
+		initialUserX = w /2;
+		initialUserY = h/2;
 		// Add Prey and Predators to the world.
 		populate(numPrey, numPredator);
-	}
 
+		/*Input key  description */
+		System.out.println("Press ENTER to RESET the World!");
+		System.out.println("Press ESCAPE to EXIT the program!");
+		System.out.println("Press SPACE to CHANGE the Canvas Color!");
+		System.out.println("Click on the Canvas to add Pray at the Clicked location!");
+
+	}
 
 	/**
 	 * Generates numPrey random prey and numPredator random predators
@@ -61,235 +67,452 @@ public class World {
 		// Generates numPrey prey and numPredator predators 
 		// randomly placed around the world.
 
+
 		for (int i = 0; i < numPrey; i++) {
 			int initialPrayX = Helper.nextInt(width - 2);
 			int initialPrayY = Helper.nextInt(height - 2);
 			Color initialColor = Helper.newRandColor();
-			// public Pray( int x, int y, Color c, boolean camouflage )
 			Pray newPray = new Pray(initialPrayX, initialPrayY, initialColor);
-			newPray.setCamouflage(false);
-			newPray.visibility(canavasColor);
-			//System.out.println("Populating...Prays...");
+
+
+
+			if(initialColor == canvasColor){
+				newPray.camouflage = true;
+			}
 			prays.add(newPray);
 		}
-		//clonePray = ((Pray)animals);
 
 		for (int i = 0; i < numPredators; i++) {
 			int initialPrdX = Helper.nextInt(width - 2);
 			int initialPrdY = Helper.nextInt(height - 2);
-			int prdEnergy = 100;
-			Color newColor = Color.RED;
-			Predator newPrd = new Predator(initialPrdX, initialPrdY, newColor, prdEnergy);
-			newPrd.setEnergy(100);
-
-			//Predator newPrd = new Predator(new Predator(initialPrdX, initialPrdY, newPrd.getPredColor(), newPrd.getEnergy()));
-			//System.out.println("Populating...Predator BEFORE");
+			Predator newPrd = new Predator(initialPrdX, initialPrdY, Color.RED);
 			predators.add(newPrd);
-			//System.out.println("Populating...Predator");
-
 		}
-		//toString();
-
 	}
 
+	public void populateUser(){
+
+		if(user.size() == 0){
+			userP = new Pray(initialUserX, initialUserY, Helper.newRandColor());
+			user.add(userP);
+		}
+	}
 	/**
 	 * Updates the state of the world for a time step.
 	 */
 	public void update() {
+		//populateUser();
 		// Move predators, prey, etc
-		//System.out.println("P-- " + predators.size() + "  R-- " + prays.size());
-		if ( prays.size() < 3 && predators.isEmpty() == false){
-			//predators.get(i).setIsAlive(false);
-			for(int c=0; c<predators.size(); c++){
-				predators.get(c).setEnergy(predators.get(c).getEnergy() - 100000);
-				//predators.get(i).setEnergy(predators.get(i).getEnergy() - 1000000);
-				//predators.get(c).setIsAlive(false);
-				System.out.println("Dying..." + predators.get(c).getEnergy() + "  size "+ predators.size());
-				toString(predators);
-			}
 
+		lookUp();
+		move();
+		reproduce("P", "R");
+		checkMutation();
+		die();
+
+		/**
+		 * New rules and Extra features
+		 * **/
+		predatorGhosting();
+		PrayIntelligence();
+
+	}
+
+	/**
+	 * Move the pray and predators
+	 * **/
+	public void move(){
+		moveUser();
+		movePray();
+		movePredator();
+	}
+
+	/**
+	 * Move the pray
+	 * **/
+	public void movePray(){
+		for(int i=0; i<prays.size(); i++){
+			prays.get(i).move();
 
 		}
+	}
 
-		if (predators != null && prays != null) {
-
-			for (int i = 0; i < predators.size(); i++) {
-				//System.out.println("P-- " + predators.get(i).isAlive() + "  Energy:  " + predators.get(i).getEnergy() );
-				if ( predators.get(i).getEnergy() <= 0) {
-					//predators.get(i).setColor(Color.blue);
-					//System.out.println("P-- " + predators.get(i).isAlive() + "  Energy:  " + predators.get(i).getEnergy() );
-					//checkCoordination(prays.get(i).getXpos(), prays.get(i).getYpos());
-					predators.remove(i);
-				}
-				//System.out.println("P-- size: " + predators.size() );
-				if(predators.size() != 0){
-					//checkCoordination(predators.get(i).getXpos(), predators.get(i).getYpos());
-					//System.out.println("P-- size: not Empty" + predators.size() );
-				}
-
-			}
-
-		}
-
-		//System.out.println("programCounter...updating..." + programCounter++);
-		for (int i = 0; i < eaten.size(); i++) {
-			for (int j = 0; j < prays.size(); j++) {
-				if (eaten.get(i).equals(prays.get(j)) == true) {
-					prays.remove(prays.get(j));
-				}
-			}
-		}
-
-
-		ArrayList<Predator> pp = predators;
-		ArrayList<Pray> rr = prays;
-
-		//checkCoordination(pp, rr);
-		for (Pray r : prays) {
-			if (r.alive != false) {
-				r.move();
-			}
-
-			//checkCoordination(predators, prays);
-		}
+	/**
+	 * Move the pray
+	 * **/
+	public void movePredator(){
 		for (Predator p : predators) {
 			p.move();
 		}
-		reproduce();
 	}
-	public boolean checkCoordination(int x, int y) {
-		//System.out.println("programCounter...checking coordination..." + programCounter++);
 
-		for (int i = 0; i < predators.size(); i++) {
-			for (int j = 0; j < prays.size(); j++) {
-				//p = prays.get(j);
-				if(predators.get(i).getEnergy() <= 0){
-					predators.get(i).setIsAlive(false);
-					predators.get(i).setColor(Color.blue);
-				}
-				x = prays.get(j).getXpos();
-				y =prays.get(j).getYpos();
-				if (predators.get(i).getXpos() == x && predators.get(i).getYpos() == y && prays.get(j).visibility(canavasColor) != true) {
-					prays.get(j).setAlive(false);
-					//System.out.println("PP size... " + predators.size() + " Pray size... " + prays.size() + " --Cam :" + prays.get(j).getCamouflage() + " Vis : " + prays.get(j).visibility(canavasColor));
-					eaten.add(prays.get(j));
-					//System.out.println("Intersected...");
-					//System.out.println("Before... " + predators.get(i).getEnergy());
-					//if(predators.get(i).getEnergy() <= 100000000){
-						predators.get(i).setEnergy(predators.get(i).getEnergy() + 100000000);
-						//System.out.println("After... " + predators.get(i).getEnergy());
-					//}
+	/**
+	 * Check the coordination weather the predator eat the pray
+	 * */
+	public void checkCoordination(int x, int y, String name) {
+		if(name.contains("P")){
+			// iterate through evey predator for every pray
+			for(int i = 0; i < predators.size(); i++) {
+				for (int j = 0; j < prays.size(); j++) {
+					x = prays.get(j).getXpos();
+					y =prays.get(j).getYpos();
 
-
-					predators.get(i).setColor(Color.black);
-
-					//System.out.println( predators.get(j).getXpos() + "...Killed..." +  predators.get(j).getYpos());
-					//System.out.println( prays.get(j).getXpos() + "..." +  prays.get(j).getYpos() + " Intersected ..." + prays.get(j).alive + " Canvas: "+ prays.get(j).visibility(canavasColor));
-					//prays.get(j).setColor(Color.black);
-					//p = prays.get(j);
-					prays.remove(prays.get(j));
-					return false;
-				}
-			}
-		}
-		return true;
-	}
-	public void reproduce() {
-
-		if (prays != null) {
-
-		for (int i = 0; i < prays.size(); i++) {
-			int max = 3;
-			//System.out.println("NOT Produced...");
-			if (prays.get(i).reproduce() == true) {
-				while (max != 0) {
-
-					int x = Helper.nextInt(width - 2);
-					int y = Helper.nextInt(height - 2);
-					prays.add(new Pray(x, y, Helper.newRandColor()));
-					//prays.get(i).setX( Helper.nextInt(width - 2));
-					//prays.get(i).setY( Helper.nextInt(height - 2));
-					//prays.get(i).setColor(Color.blue);
-					//Helper.newRandColor()
-					//System.out.println("Produced...-R-....." + prays.get(i).offSpring);
-					max--;
-				}
-
-			}
-		}
-		for(int i=0; i<predators.size(); i++){
-			if (predators != null){
-				int max = 2;
-				if (predators.get(i).reproduce() == true) {
-					while (max != 0) {
-
-						int x = Helper.nextInt(width - 2);
-						int y = Helper.nextInt(height - 2);
-						int energy = 100;
-						predators.add(new Predator(x, y, Color.yellow,energy));
-						//prays.get(i).setX( Helper.nextInt(width - 2));
-						//prays.get(i).setY( Helper.nextInt(height - 2));
-						//prays.get(i).setColor(Color.blue);
-						//Helper.newRandColor()
-						//System.out.println("Produced...-P-...." + predators.get(i).offSpring);
-						max--;
+					if(prays.get(j).camouflage == true){
+						System.out.println("I am INVISIBLE");
 					}
-
+					// compare each predator's x and y position with the pray which it's color not camouflaged
+					if(predators.get(i).x == x && predators.get(i).y == y && prays.get(j).camouflage != true) {
+						// each pray's life will set to false
+						prays.get(j).alive = false;
+						// then it wil be removed from the world
+						prays.remove(j);
+						// the predator that eats the pray will gain energy
+						predators.get(i).energy+= 1;
+					}
+					else{
+						// otherwise, any predator that did not eat any pray at that point in time will loose energy
+						predators.get(i).energy-= 0.001;
+					}
 				}
 			}
+		}
+		else if(name.contains("U") && user.size() != 0){
+			for (int i=0; i<prays.size(); i++){
+				x = user.get(0).x;
+				y = user.get(0).y;
 
+				if(x == prays.get(i).x && y == prays.get(i).y){
+					user.remove(0);
+
+				}
+				if(user.size() == 0){
+					System.out.println(user.size() +"  Break");
+					break;
+				}
 			}
 		}
 	}
+	/**
+	 * Calculate the rate of reproducing for pray and predator in time
+	 * **/
+	public void reproduce(String predator, String pray) {
+		// set the probability 0 to 100
+		int probability = Helper.nextInt(100)+ 1;
+		// the predator has a 1% chance of reproducing an offspring
+		if(predator.contains("P") && probability == 1 && predators.size() != 0){
+			// Three offspring's will populate in the world
+			populate(0, 3);
+		}
+		// the predator has a 10% chance of reproducing a single offspring
+		else if(pray.contains("R") && probability > 0 && probability <= 10){
+			populate(1, 0);
+
+
+			}
+		}
+
+	/**
+	 * Calculate the rate of mutation for pray
+	 * **/
+	public void checkMutation(){
+		int probability = Helper.nextInt(100)+1;
+		// the pray has a 10% chance of mutation
+		int mutationRate = prays.size() /100 * 10;
+		// check the probability of mutation
+		if(probability > 0 && probability <= 10){
+			// a 10% of the mutation will occur in the pray population at this point in time
+			for(int i=0; i<mutationRate; i++){
+				// if the pray reproducing chance will set to true if it was already false
+				if(prays.get(Helper.nextInt(prays.size())).reproduce == true){
+					prays.get(Helper.nextInt(prays.size())).reproduce = false;
+				}
+			}
+		}
+	}
+	public void die(){
+		for(int i=0; i< predators.size(); i++){
+			if(predators.get(i).energy <= 0){
+				predators.remove(i);
+			}
+		}
+	}
+	/**
+	 * Move the user
+	 * **/
+	public void moveUser(){
+		if(user.size() != 0){
+			userP.c = Helper.newRandColor();
+			if(userControl('w') == 0){
+				userP.moveUp();
+			}
+			else if(userControl('s') == 1){
+				userP.moveDown();
+			}
+			else if(userControl('a') == 2){
+				userP.moveLeft();
+			}
+			else if(userControl('d') == 3){
+				userP.moveRight();
+			}
+		}
+	}
+
 	/**
 	 * Draw all the predators and prey.
 	 */
 	public void draw() {
 		/* Clear the screen */
-		//System.out.println("Drawing...");
-		//System.out.println("programCounter...Drawing..." + programCounter++);
-		PPSim.dp.clear(canavasColor);
-		// ((B)a) B is child --a is  parent
-		//System.out.println("Drawing..");
 
-
-//		for (int i = 0; i < animals.size(); i++) {
-//			//System.out.println("Looking to remove..." + animals.get(i).isAlive());
-//			//public void checkCoordination(ArrayList<Predator> predators, ArrayList<Pray> prays)
-//			//checkCoordination(animals);
-//			if (animals.get(i).isAlive() == false) {
-//				animals.remove(i);
-//				//System.out.println("pray removed...from draw method " + animals.size());
-//			}
-//			animals.get(i).draw();
-//
-//		}
-
+		PPSim.dp.clear(canvasColor);
+		//checkCoordination(userP.x, userP.y, "U");
+		if (user.size() != 0){
+			userP.c = Helper.newRandColor();
+			user.get(0).draw();
+		}
 		for (Predator p : predators) {
-			checkCoordination(p.x, p.y);
+			checkCoordination(p.x, p.y, "P");
 			p.draw();
 		}
-//		for (int i = 0; i < prays.size(); i++) {
-////			if (checkCoordination(prays.get(i)) == true){
-//			checkCoordination(p.x, p.y);
-//			prays.get(i).draw();
-////			}
-//		}
-		for(Pray r: prays){
-			//checkCoordination(r.x, r.y);
-			r.draw();
+		for(int i=0; i<prays.size(); i++){
+			//checkCoordination(prays.get(i).x, prays.get(i).y);
+			prays.get(i).draw();
 		}
 
 	}
+	/**
+	 * Prays will detect a predator from certain distance and try to run away
+	 * Predators will detect a pray from certain distance try to chase to ward that direction
+	 * **/
+	public void lookUp() {
 
+		/**
+		* Check predators presence
+		* up = 0 , down = 1 , left = 2,  right = 3
+		**/
+		// maximum range the pray can detect predator
+		int maxRange = 10;
+		// iterate through evey pray for every predator
+		for (int i = 0; i < prays.size(); i++) {
+				for (int j = 0; j < predators.size(); j++) {
+					int x = predators.get(j).x;
+					int y = predators.get(j).y;
+					int randomNum = ThreadLocalRandom.current().nextInt(2, 3 + 1);
 
-	public String toString(ArrayList<Predator> animals){
-		String str = " ";
-		for(Animal a: animals){
-			str+= " : ";
-			System.out.println(a.getName() + " x: " + a.x + " --  y: " + a.y);
+					// the pray will escape to up, if the predator approach from south
+					if ((prays.get(i).x == x) && (y - prays.get(i).y) <= maxRange && (y - prays.get(i).y) > 0) {
+						// if there is enough space, the pray will run 2 square away
+						if(prays.get(i).y > 2) {
+							prays.get(i).y = prays.get(i).y - 2;
+						}
+						prays.get(i).direction = 0;
+					}
+					// The pray will escape to down, if the predator approach from north
+					if ((prays.get(i).x == x) && (prays.get(i).y - y) <= maxRange && (prays.get(i).y - y) > 0 ) {
+						// if there is enough space, the pray will run 2 square away
+						if(prays.get(i).y + 2 < MAX_Y - 2) {
+							prays.get(i).y = prays.get(i).y + 2;
+						}
+						prays.get(i).direction = 1;
+					}
+					// the pray will escape to left, if the predator approach from East
+					if ((prays.get(i).y == y) && (x - prays.get(i).x) <= maxRange && (x - prays.get(i).x) > 0 && prays.get(i).x >= 2) {
+						// if there is enough space, the pray will run 2 square away
+						if(prays.get(i).x > 2) {
+							prays.get(i).x = prays.get(i).x - 2;
+						}
+						prays.get(i).direction = 2;
+						//prays.get(i).direction = 2;
+					}
+					//the pray will escape to right, if the predator approach from West
+					if ((prays.get(i).y == y) && (prays.get(i).x - x) <= maxRange && (prays.get(i).x - x) > 0) {
+						// if there is enough space, the pray will run 2 square away
+						if(prays.get(i).x < MAX_X - 2) {
+							prays.get(i).x = prays.get(i).x + 2;
+						}
+						prays.get(i).direction = 3;
+					}
+
+				}
+			}
+			/**
+			 * Check prays presence
+			 * up = 0 , down = 1 , left = 2,  right = 3
+			 **/
+		// maximum range the predator can detect pray
+			maxRange = 15;
+			// iterate through evey predator for every pray
+			for (int i = 0; i < predators.size(); i++) {
+				for (int j = 0; j < prays.size(); j++) {
+
+					int x = prays.get(j).x;
+					int y =prays.get(j).y;
+					// chase the pray up if it appears from north
+					if ( (predators.get(i).x == x) && (predators.get(i).y - y) <= maxRange && (predators.get(i).y - y) > 0 && prays.get(j).camouflage != true) {
+						predators.get(i).direction = 0;
+					}
+					// chase the pray down if it appears from south
+					if (predators.get(i).x == x && y - predators.get(i).y <= maxRange && y - predators.get(i).y > 0 && prays.get(j).camouflage != true) {
+
+						predators.get(i).direction = 1;
+					}
+					// chase the pray left if it appears from west
+					if (predators.get(i).y == y && predators.get(i).x - x <= maxRange && predators.get(i).x - x > 0 && prays.get(j).camouflage != true) {
+						predators.get(i).direction = 2;
+					}
+					// chase the pray right if it appears from east
+					if (predators.get(i).y == y && x - predators.get(i).x <= maxRange && x - predators.get(i).x > 0 && prays.get(j).camouflage != true) {
+						predators.get(i).direction = 3;
+					}
+				}
+			}
+	}
+	/**
+	 * The pray analyzes multi obstacle scenarios to scape from the predator
+	 * including random directions if there are more than one escaping possibilities
+	 * */
+	public void PrayIntelligence(){
+
+		int maxRange = 10;
+			for (int i = 0; i < prays.size(); i++) {
+				for (int j = 0; j < predators.size(); j++) {
+					int x = predators.get(j).x;
+					int y = predators.get(j).y;
+					int randomNum = ThreadLocalRandom.current().nextInt(2, 3 + 1);
+
+					/**
+					 * All edge cases have been handled
+					 * */
+
+					// The pray will change the direction to the left
+					if ((prays.get(i).x == x) && (prays.get(i).y - y) <= maxRange && (prays.get(i).y - y) > 0 && MAX_X - prays.get(i).x <= 10 && MAX_Y - prays.get(i).y <= 2) {
+						prays.get(i).direction = 2;
+					}
+					// The pray will change the direction to the left or right randomly while the predator chasing from North to south
+					else if((prays.get(i).x == x) && (prays.get(i).y - y) <= maxRange && (prays.get(i).y - y) > 0 && prays.get(i).x >= MAX_X / 10 && prays.get(i).x <= MAX_X - 10 && MAX_Y - prays.get(i).y <= 2){
+						prays.get(i).direction = randomNum;
+					}
+					// The pray will change the direction to the left or right randomly while the predator chasing from South to North
+					else if((prays.get(i).x == x) && (y - prays.get(i).y) <= maxRange && (y - prays.get(i).y) > 0 && prays.get(i).x >= MAX_X / 10 && prays.get(i).x <= MAX_X - 10 && prays.get(i).y <= 2){
+						//MAX_Y - prays.get(i).y <= 2
+						prays.get(i).direction = randomNum;
+					}
+					// The pray will change the direction to the left
+					if ((prays.get(i).x == x) && (y - prays.get(i).y) <= maxRange && (y - prays.get(i).y) > 0 && MAX_X - prays.get(i).x <= 10 && prays.get(i).y <= 2) {
+						prays.get(i).direction = 2;
+					}
+					// The pray will change the direction to the left
+					if ((prays.get(i).x == x) && (y - prays.get(i).y) <= maxRange && (y - prays.get(i).y) > 0 && prays.get(i).x <= 10 && prays.get(i).y <= 2) {
+						prays.get(i).direction = 3;
+					}
+					// The pray will randomly turn up or down
+					if(prays.get(i).y  == y && prays.get(i).x - x <= maxRange && prays.get(i).x - x > 0 && prays.get(i).y >= MAX_Y / 10 && prays.get(i).y <= MAX_Y - 10 && MAX_X - prays.get(i).x <= 2){
+						// scape to up or down
+						prays.get(i).direction = Helper.nextInt(2);
+					}
+					//the pray will turn to down at the edge
+					if(prays.get(i).y  == y && prays.get(i).x - x <= maxRange && prays.get(i).x - x > 0 && prays.get(i).y <= 2 && MAX_X - prays.get(i).x <= 2){
+						// scape to up or down
+						prays.get(i).direction = 1;
+					}
+					// the pray will turn to up at the edge
+					if(prays.get(i).y  == y && prays.get(i).x - x <= maxRange && prays.get(i).x - x > 0 && MAX_Y - prays.get(i).y <= 2 && MAX_X - prays.get(i).x <= 2){
+						// scape to up or down
+						prays.get(i).direction = 0;
+					}
+					// The pray will randomely turn up or down
+					if(prays.get(i).y  == y && prays.get(i).x - x <= maxRange && x - prays.get(i).x > 0 && prays.get(i).y >= MAX_Y / 10 && prays.get(i).y <= MAX_Y - 10 && prays.get(i).x <= 2){
+						// scape to up or down
+						prays.get(i).direction = Helper.nextInt(2);
+					}
+					// the pray will turn to up at the edge
+					if(prays.get(i).y  == y && prays.get(i).x - x <= maxRange && x - prays.get(i).x > 0 && MAX_Y - prays.get(i).y <= 2 && prays.get(i).x <= 2){
+						// scape to up or down
+						prays.get(i).direction = 0;
+					}
+					// the pray will turn to down at the edge
+					if(prays.get(i).y  == y && prays.get(i).x - x <= maxRange && x - prays.get(i).x > 0 && prays.get(i).y <= 2 && prays.get(i).x <= 2){
+						// scape to up or down
+						prays.get(i).direction = 1;
+					}
+				}
+			}
+	}
+
+	/**
+	 * The predator moves aggressively toward the pray
+	 * when it maintains a precision of certain distance between the pray
+	 * */
+	public void predatorGhosting(){
+
+		for (int i = 0; i < predators.size(); i++) {
+			for (int j = 0; j < prays.size(); j++) {
+				int x = predators.get(i).x;
+				int y = predators.get(i).y;
+				int pX = prays.get(j).x;
+				int pY = prays.get(j).y;
+				// locking distance the predator can ghost to the pray
+				int lockedDis = 6;
+				// ghosting up while the pray present in the precision distance
+				if (x - pX == 0 && y - pY == lockedDis){
+					predators.get(i).y-=lockedDis;
+				}
+				// ghosting down  while the pray present in the precision distance
+				if(x - pX == 0 && pY - y == lockedDis){
+					predators.get(i).y+=lockedDis;
+				}
+				// ghosting right  while the pray present in the precision distance
+				if(y - pY == 0 && x - pX == lockedDis){
+					predators.get(i).x-=lockedDis;
+				}
+				// ghosting left  while the pray present in the precision distance
+				if(y - pY == 0 && pX - x == lockedDis){
+					predators.get(i).x+=lockedDis;
+				}
+
+			}
 		}
-		return str;
+	}
+	/**
+	 * New random color pray will drop at the x and y coordinate
+	 * within the bound of the world where the user clicked
+	 * **/
+	public void mouseInput(int x, int y){
+			Pray dropPray = new Pray(x, y, Helper.newRandColor());
+			prays.add(dropPray);
+	}
+	public int userControl(char key){
+		if (key == 'w'){
+			return 0;
+
+		}
+		if (key == 's'){
+			return 1;
+		}
+		if (key == 'a'){
+			return 2;
+		}
+		if (key == 'd'){
+			return 3;
+		}
+		return -1;
+	}
+	/**
+	 * The world listen to the SPACE key and changes the canvas to random color
+	 * **/
+	public void changeCanvas(){
+		canvasColor = Helper.newRandColor();
+	}
+	/**
+	 * The world listen to the ENTER key and resets
+	 * the world to the initial the number of prays and predators
+	 * **/
+	public void resetWorld() {
+		// Clear all predators and prays from the canvas
+		prays.clear();
+		predators.clear();
+		user.clear();
+		// repopulate the predators and prays to the canvas
+		populate(initialPrays, initialPredators);
 	}
 
 }

@@ -1,4 +1,6 @@
 package util;
+import predator_prey_sim.PPSim;
+
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
@@ -151,7 +153,6 @@ public class DotPanel extends javax.swing.JPanel {
 			System.out.println("Error sleeping");
 		}
 	}
-
 
 }
 
