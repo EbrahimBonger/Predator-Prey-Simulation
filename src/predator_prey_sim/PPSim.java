@@ -30,6 +30,7 @@ public class PPSim extends JFrame implements KeyListener, MouseListener {
 	public static DotPanel screenSource;
 	private World ppworld;
 
+
 	/* Define constants using static final variables */
 	public static final int MAX_X = 100;
 	public static final int MAX_Y = 100;
@@ -123,20 +124,6 @@ public class PPSim extends JFrame implements KeyListener, MouseListener {
 			case KeyEvent.VK_ENTER:
 				ppworld.resetWorld();
 				break;
-		}
-		char c = e.getKeyChar();
-
-		if (c == 'w'){
-			ppworld.userControl('w');
-		}
-		if (c == 's'){
-			ppworld.userControl('s');
-		}
-		if (c == 'a'){
-			ppworld.userControl('a');
-		}
-		if (c == 'd'){
-			ppworld.userControl('d');
 		}
 	}
 

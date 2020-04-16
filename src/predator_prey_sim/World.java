@@ -18,14 +18,10 @@ public class World {
 	private Color canvasColor;
 	ArrayList<Predator> predators = new ArrayList<Predator>();
 	ArrayList<Pray> prays = new ArrayList<Pray>();
-	ArrayList<Predator> die = new ArrayList<Predator>();
-	ArrayList<Pray> eaten = new ArrayList<>();
 	ArrayList<Pray> user = new ArrayList<>();
 	private int initialPrays;
 	private int initialPredators;
-	private int initialUserX;
-	private int initialUserY;
-	Pray userP;
+
 
 
 	/**
@@ -42,8 +38,7 @@ public class World {
 		initialPrays = numPrey;
 		initialPredators = numPredator;
 		canvasColor = Helper.newRandColor();
-		initialUserX = w /2;
-		initialUserY = h/2;
+
 		// Add Prey and Predators to the world.
 		populate(numPrey, numPredator);
 
@@ -51,7 +46,7 @@ public class World {
 		System.out.println("Press ENTER to RESET the World!");
 		System.out.println("Press ESCAPE to EXIT the program!");
 		System.out.println("Press SPACE to CHANGE the Canvas Color!");
-		System.out.println("Click on the Canvas to add Pray at the Clicked location!");
+		System.out.println("Click on the Canvas to add Pray at the clicked location!");
 
 	}
 
@@ -90,18 +85,10 @@ public class World {
 		}
 	}
 
-	public void populateUser(){
-
-		if(user.size() == 0){
-			userP = new Pray(initialUserX, initialUserY, Helper.newRandColor());
-			user.add(userP);
-		}
-	}
 	/**
 	 * Updates the state of the world for a time step.
 	 */
 	public void update() {
-		//populateUser();
 		// Move predators, prey, etc
 
 		lookUp();
@@ -122,7 +109,6 @@ public class World {
 	 * Move the pray and predators
 	 * **/
 	public void move(){
-		moveUser();
 		movePray();
 		movePredator();
 	}
@@ -176,21 +162,6 @@ public class World {
 				}
 			}
 		}
-		else if(name.contains("U") && user.size() != 0){
-			for (int i=0; i<prays.size(); i++){
-				x = user.get(0).x;
-				y = user.get(0).y;
-
-				if(x == prays.get(i).x && y == prays.get(i).y){
-					user.remove(0);
-
-				}
-				if(user.size() == 0){
-					System.out.println(user.size() +"  Break");
-					break;
-				}
-			}
-		}
 	}
 	/**
 	 * Calculate the rate of reproducing for pray and predator in time
@@ -236,26 +207,6 @@ public class World {
 			}
 		}
 	}
-	/**
-	 * Move the user
-	 * **/
-	public void moveUser(){
-		if(user.size() != 0){
-			userP.c = Helper.newRandColor();
-			if(userControl('w') == 0){
-				userP.moveUp();
-			}
-			else if(userControl('s') == 1){
-				userP.moveDown();
-			}
-			else if(userControl('a') == 2){
-				userP.moveLeft();
-			}
-			else if(userControl('d') == 3){
-				userP.moveRight();
-			}
-		}
-	}
 
 	/**
 	 * Draw all the predators and prey.
@@ -264,11 +215,7 @@ public class World {
 		/* Clear the screen */
 
 		PPSim.dp.clear(canvasColor);
-		//checkCoordination(userP.x, userP.y, "U");
-		if (user.size() != 0){
-			userP.c = Helper.newRandColor();
-			user.get(0).draw();
-		}
+
 		for (Predator p : predators) {
 			checkCoordination(p.x, p.y, "P");
 			p.draw();
@@ -296,7 +243,6 @@ public class World {
 				for (int j = 0; j < predators.size(); j++) {
 					int x = predators.get(j).x;
 					int y = predators.get(j).y;
-					int randomNum = ThreadLocalRandom.current().nextInt(2, 3 + 1);
 
 					// the pray will escape to up, if the predator approach from south
 					if ((prays.get(i).x == x) && (y - prays.get(i).y) <= maxRange && (y - prays.get(i).y) > 0) {
@@ -419,7 +365,7 @@ public class World {
 						// scape to up or down
 						prays.get(i).direction = 0;
 					}
-					// The pray will randomely turn up or down
+					// The pray will randomly turn up or down
 					if(prays.get(i).y  == y && prays.get(i).x - x <= maxRange && x - prays.get(i).x > 0 && prays.get(i).y >= MAX_Y / 10 && prays.get(i).y <= MAX_Y - 10 && prays.get(i).x <= 2){
 						// scape to up or down
 						prays.get(i).direction = Helper.nextInt(2);
@@ -453,19 +399,19 @@ public class World {
 				// locking distance the predator can ghost to the pray
 				int lockedDis = 6;
 				// ghosting up while the pray present in the precision distance
-				if (x - pX == 0 && y - pY == lockedDis){
+				if (x - pX == 0 && y - pY == lockedDis && prays.get(j).camouflage != true){
 					predators.get(i).y-=lockedDis;
 				}
 				// ghosting down  while the pray present in the precision distance
-				if(x - pX == 0 && pY - y == lockedDis){
+				if(x - pX == 0 && pY - y == lockedDis && prays.get(j).camouflage != true){
 					predators.get(i).y+=lockedDis;
 				}
 				// ghosting right  while the pray present in the precision distance
-				if(y - pY == 0 && x - pX == lockedDis){
+				if(y - pY == 0 && x - pX == lockedDis && prays.get(j).camouflage != true){
 					predators.get(i).x-=lockedDis;
 				}
 				// ghosting left  while the pray present in the precision distance
-				if(y - pY == 0 && pX - x == lockedDis){
+				if(y - pY == 0 && pX - x == lockedDis && prays.get(j).camouflage != true){
 					predators.get(i).x+=lockedDis;
 				}
 
@@ -480,22 +426,7 @@ public class World {
 			Pray dropPray = new Pray(x, y, Helper.newRandColor());
 			prays.add(dropPray);
 	}
-	public int userControl(char key){
-		if (key == 'w'){
-			return 0;
 
-		}
-		if (key == 's'){
-			return 1;
-		}
-		if (key == 'a'){
-			return 2;
-		}
-		if (key == 'd'){
-			return 3;
-		}
-		return -1;
-	}
 	/**
 	 * The world listen to the SPACE key and changes the canvas to random color
 	 * **/

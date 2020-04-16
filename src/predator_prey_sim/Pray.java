@@ -8,7 +8,7 @@ import static predator_prey_sim.PPSim.*;
 
 public class Pray extends Animal {
 
-    boolean camouflage = false;
+    public boolean camouflage = false;
     boolean reproduce = true;
 
     public Pray( int x, int y, Color c){
@@ -22,7 +22,7 @@ public class Pray extends Animal {
         int randDirection  = Helper.nextInt(4);
         // changing direction randomly
         if(probability < 10 && probability > 0){
-            direction = randDirection;
+           direction = randDirection;
         }
             if (direction == 0){ moveUp();}
             if (direction == 1){moveDown();}
@@ -30,7 +30,7 @@ public class Pray extends Animal {
            if (direction == 3){moveRight();}
     }
 
-    public void moveDown() {
+    private void moveDown() {
         if (alive == true) {
             if (y < MAX_Y - 2) {
                 y = y + 1;
@@ -38,21 +38,21 @@ public class Pray extends Animal {
             }
         }
     }
-    public void moveUp() {
+    private void moveUp() {
         if (alive == true){
             if (y > 0) {
                 y = y - 1;
             }
         }
     }
-    public void moveLeft() {
+    private void moveLeft() {
         if (alive == true){
             if (x > 0) {
                 x = x - 1;
             }
         }
     }
-    public void moveRight() {
+    private void moveRight() {
         if (alive == true) {
             if (x < MAX_X - 2) {
                 x = x + 1;
