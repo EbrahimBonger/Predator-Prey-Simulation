@@ -292,20 +292,20 @@ public class World {
 
 					int x = prays.get(j).x;
 					int y =prays.get(j).y;
-					// chase the pray up if it appears from north
+					// chase the pray up if it appears from NORTH
 					if ( (predators.get(i).x == x) && (predators.get(i).y - y) <= maxRange && (predators.get(i).y - y) > 0 && prays.get(j).camouflage != true) {
 						predators.get(i).direction = 0;
 					}
-					// chase the pray down if it appears from south
+					// chase the pray down if it appears from SOUTH
 					if (predators.get(i).x == x && y - predators.get(i).y <= maxRange && y - predators.get(i).y > 0 && prays.get(j).camouflage != true) {
 
 						predators.get(i).direction = 1;
 					}
-					// chase the pray left if it appears from west
+					// chase the pray left if it appears from WEST
 					if (predators.get(i).y == y && predators.get(i).x - x <= maxRange && predators.get(i).x - x > 0 && prays.get(j).camouflage != true) {
 						predators.get(i).direction = 2;
 					}
-					// chase the pray right if it appears from east
+					// chase the pray right if it appears from EAST
 					if (predators.get(i).y == y && x - predators.get(i).x <= maxRange && x - predators.get(i).x > 0 && prays.get(j).camouflage != true) {
 						predators.get(i).direction = 3;
 					}
