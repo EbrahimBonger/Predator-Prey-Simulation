@@ -2,7 +2,7 @@ prayIntelligence function:
   
   
 The added extra features to the species mimic their natural evolutionary inclination in the real world animal kingdom. 
-In short word, the pay and predator have to have an evolutionary trait specific to their survival need. In consideration 
+In short word, the pray and predator have to have an evolutionary trait specific to their survival need. In consideration 
 of demonstrating the real-world scenario in this respect, I have implemented the following functionalities in the simulation.
 
 The pray has been featured with multiple case scenarios to avoid the possible predator attack. The pray analyzes the proximity
