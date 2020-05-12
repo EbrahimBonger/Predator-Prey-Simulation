@@ -1,4 +1,4 @@
-prayIntelligience function:
+prayIntelligence function:
   
   
 The added extra features to the species mimic their natural evolutionary inclination in the real world animal kingdom. 
@@ -9,6 +9,8 @@ The pray has been featured with multiple case scenarios to avoid the possible pr
 of all four dimensions during the presence of a predator(s) and then takes a swift move through the most efficient and less risky path. 
 It covers up to 20 edge cases, including the most sophisticated four 90' corners. Depend on the circumstances, the pray performs 
 a random escaping turn if there is more than one escaping path detected.
+
+
 
 
 predatorGhosting function:
