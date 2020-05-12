@@ -17,7 +17,7 @@ predatorGhosting function:
 
 The fact that the pray becoming evolutionarily smart for survival, I find it quite necessary in adding aggressive characteristics for 
 the predator, which offset their outstanding survival skills from one another. The predator has a trait that allows overpowering the 
-pray with a condition. If the pray present in the predator's detection with a precision of certain distance the predator will lock that 
+pray with a condition. If the pray present in the predator's detection with a precision of certain distance, the predator will lock that 
 position and jump to the pray immediately.
 
 
