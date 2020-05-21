@@ -1,5 +1,7 @@
 # Predator Prey Simulation
 
+![](demo/pray_predator_simulation_demo.gif)
+
  Predator Rules
 
 When the simulation starts, 5 predators (default value) are created at random locations in the world.
