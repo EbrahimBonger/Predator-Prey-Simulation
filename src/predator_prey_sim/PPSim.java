@@ -10,7 +10,6 @@ import java.util.EventListener;
 
 import javax.swing.*;
 
-
 /*
  * You must add a way to represent predators.  When there is no prey, predators
  * should follow these simple rules:
