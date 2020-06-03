@@ -1,6 +1,6 @@
 # Predator Prey Simulation
 
-The project has been implemented to create a virtual world where pray and predator species interact on another for their survival. Both species exhibit their respective traits which they have developed evolutionarily. Out of many traits, there are two traits for each species that give the simulation the approximate imitation of the real world pray and predator interaction. The pray has artificial intellegence feature to minimize its detection by the predator. As the pray becoming smart, the Predator has aggressiveness feature to  offset their outstanding survival skills from one another. 
+The project has been implemented to create a virtual world where prays and predators species interact on another for their survival. Both species exhibit their respective traits which they have developed evolutionarily. Out of many traits, there are two traits for each species that give the simulation the approximate imitation of the real world pray and predator interaction. The pray has an artificial intelligence feature to minimize its detection by the predator. As the pray becoming smart, the Predator has aggressiveness feature to offset their outstanding survival skills from one another. 
 
 
 ![](demo/pray_predator_simulation_demo.gif)
