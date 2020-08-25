@@ -135,13 +135,13 @@ public class World {
 	/**
 	 * Check the coordination weather the predator eat the pray
 	 * */
-	public void checkCoordination(int x, int y, String name) {
+	public void checkCoordination(String name) {
 		if(name.contains("P")){
 			// iterate through evey predator for every pray
 			for(int i = 0; i < predators.size(); i++) {
 				for (int j = 0; j < prays.size(); j++) {
-					x = prays.get(j).getXpos();
-					y =prays.get(j).getYpos();
+					int x = prays.get(j).getXpos();
+					int y = prays.get(j).getYpos();
 
 					if(prays.get(j).camouflage == true){
 						System.out.println("I am INVISIBLE");
@@ -217,7 +217,7 @@ public class World {
 		PPSim.dp.clear(canvasColor);
 
 		for (Predator p : predators) {
-			checkCoordination(p.x, p.y, "P");
+			checkCoordination("P");
 			p.draw();
 		}
 		for(int i=0; i<prays.size(); i++){
