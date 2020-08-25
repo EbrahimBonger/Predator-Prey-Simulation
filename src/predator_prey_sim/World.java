@@ -60,7 +60,7 @@ public class World {
 	 */
 	private void populate(int numPrey, int numPredators) {
 		// Generates numPrey prey and numPredator predators 
-		// randomly placed around the world.
+		// and place them randomly in the world.
 
 
 		for (int i = 0; i < numPrey; i++) {
